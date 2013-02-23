@@ -6,7 +6,7 @@
     <ProjectGuid>{5ea0261a-4e8b-4e26-866d-93ea523e51cd}</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>cmake_multi_builder.py</StartupFile>
+    <StartupFile>cmaker.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -14,13 +14,14 @@
     <InterpreterId>00000000-0000-0000-0000-000000000000</InterpreterId>
     <InterpreterVersion>
     </InterpreterVersion>
-    <Name>cmake_multi_builder</Name>
+    <Name>cmaker</Name>
     <RootNamespace>bootstrap</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>http://zlib.net/zlib-1.2.7.tar.gz</CommandLineArguments>
+    <CommandLineArguments>C:\cmaker\zlib-1.2.7</CommandLineArguments>
     <InterpreterPath />
     <InterpreterArguments>
     </InterpreterArguments>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,7 +32,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="cmake_multi_builder.py" />
+    <Compile Include="cmaker.py" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
 </Project>

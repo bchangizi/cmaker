@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "cmake_multi_builder", "cmake_multi_builder.pyproj", "{5EA0261A-4E8B-4E26-866D-93EA523E51CD}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "cmaker", "cmaker.pyproj", "{5EA0261A-4E8B-4E26-866D-93EA523E51CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

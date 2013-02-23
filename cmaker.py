@@ -1,18 +1,23 @@
 #!/usr/bin/python
 
 import re, urllib2, zipfile, tarfile
-import os, sys, subprocess, platform, shutil, hashlib
+import os, sys, subprocess, platform, shutil, hashlib, argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("src_path", default=".")
+parser.add_argument("--cm_flags")
+parser.add_argument("--cm_initial_cache")
+args= parser.parse_args()
 
 cmake_flags = ""
 cmake_initial_cache = ""
 
-srcpath    = ""
-srcpath    = os.path.abspath(".") if len(sys.argv) == 1 else sys.argv[1] 
-tmp_dir    = os.path.abspath(os.path.join(".", os.path.basename(srcpath) + "-" + hashlib.md5(srcpath).hexdigest()[:5]))
-work_dir   = os.path.join(tmp_dir, "workdir")
-build_dir  = os.path.join(work_dir, "build")
-stage_dir  = os.path.join(work_dir, "stage")
-deploy_dir = tmp_dir
+src_path    = os.path.abspath(args.src_path)
+tmp_dir     = os.path.abspath(os.path.join(".", os.path.basename(src_path) + "-" + hashlib.md5(src_path).hexdigest()[:2]))
+work_dir    = os.path.join(tmp_dir, "cm")
+build_dir   = os.path.join(work_dir, "build")
+stage_dir   = os.path.join(work_dir, "stage")
+deploy_dir  = tmp_dir
 
 
 target_os_names     = ["Windows", "Linux", "Darwin"]
@@ -39,19 +44,22 @@ def main():
     if not os.path.exists(work_dir):
         os.makedirs(work_dir)
 
-    global srcpath
-    if srcpath.startswith("http://") == True:
-        filename = os.path.join(work_dir, os.path.basename(srcpath))
+    global src_path
+    if src_path.startswith("http://") == True:
+        remotefile = urllib2.urlopen(src_path)
+        url = remotefile.geturl()
+        basename = os.path.basename(url)
+        filename = os.path.join(work_dir, basename)
 
         if not os.path.exists(filename):
-            print "Downloading", srcpath
-            with open(filename, "wb") as code:
-                code.write(urllib2.urlopen(srcpath).read())
+            print "Downloading", url
+            with open(filename, "wb") as file:
+                file.write(remotefile.read())
 
             print "Extracting", filename
             extract_if_needed(filename, work_dir)
 
-        srcpath = os.path.join(work_dir, re.split(".tar.gz|.zip", os.path.basename(filename))[0])
+        src_path = os.path.join(work_dir, re.split(".tar.bz2|.tar.gz|.zip", os.path.basename(filename))[0])
 
     for target_os_name in target_os_names:
         for march in target_march_names:
@@ -71,10 +79,10 @@ def main():
 
                     build = [cmake, 
                              "-G", generator,
-                             ["-C", cmake_initial_cache] if len(cmake_initial_cache) > 0 else [],
-                             cmake_flags if len(cmake_flags) > 0 else [], 
+                             ["-C", cmake_initial_cache] if len(cmake_initial_cache) > 0 else "",
+                             cmake_flags if len(cmake_flags) > 0 else "", 
                              "-DCMAKE_INSTALL_PREFIX=" + specific_stage_dir, 
-                             srcpath]
+                             src_path]
                     stage = [cmake, "--build", specific_build_dir, "--config", config, "--target", "install"]
 
                     subprocess.call(build, cwd=specific_build_dir)
@@ -103,9 +111,12 @@ def extract_if_needed(path, targetdir):
     cwd = os.getcwd()
     
     try:
-        with opener(path, mode) as file:
+        file = opener(path, mode)
+        try:
             os.chdir(targetdir)
             file.extractall()
+        finally:
+            file.close()
     finally:
         os.chdir(cwd)
 
