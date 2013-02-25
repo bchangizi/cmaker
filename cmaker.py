@@ -5,12 +5,19 @@ import os, sys, subprocess, platform, shutil, hashlib, argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("src_path", default=".")
-parser.add_argument("--cm_flags")
-parser.add_argument("--cm_initial_cache")
+parser.add_argument("--cm_flags", default="")
+parser.add_argument("--cm_initial_cache", default="")
+parser.add_argument("--verbose", action="count", default=0)
+
 args= parser.parse_args()
 
-cmake_flags = ""
-cmake_initial_cache = ""
+verbosity_level = args.verbose
+cmake_flags = args.cm_flags 
+cmake_initial_cache = args.cm_initial_cache 
+
+print cmake_flags
+print cmake_initial_cache
+print "Verbosity level", verbosity_level 
 
 src_path    = os.path.abspath(args.src_path)
 tmp_dir     = os.path.abspath(os.path.join(".", os.path.basename(src_path) + "-" + hashlib.md5(src_path).hexdigest()[:2]))
@@ -77,12 +84,11 @@ def main():
                     if not os.path.exists(specific_build_dir):
                         os.makedirs(specific_build_dir)
 
-                    build = [cmake, 
-                             "-G", generator,
-                             ["-C", cmake_initial_cache] if len(cmake_initial_cache) > 0 else "",
-                             cmake_flags if len(cmake_flags) > 0 else "", 
-                             "-DCMAKE_INSTALL_PREFIX=" + specific_stage_dir, 
-                             src_path]
+                    build = [cmake, "-G", generator]
+		    if len(cmake_initial_cache) > 0: build += ["-C", cmake_initial_cache]
+		    if len(cmake_flags) > 0: build += cmake_flags.split() 
+                    build += ["-DCMAKE_INSTALL_PREFIX=" + specific_stage_dir] 
+                    build += [src_path]
                     stage = [cmake, "--build", specific_build_dir, "--config", config, "--target", "install"]
 
                     subprocess.call(build, cwd=specific_build_dir)
